@@ -111,12 +111,12 @@ type Rss struct {
 	Channel Channel  `xml:"channel"`
 }
 
+var client = &http.Client{
+	Timeout: 10 * time.Second,
+}
+
 func (p *Posts) fetchPosts(feedUrl string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
 	resp, err := client.Get(feedUrl)
 	if err != nil {
 		fmt.Printf("Encountered an error while fetching feed %s: %v\n", feedUrl, err)
