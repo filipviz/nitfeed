@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nitfeed</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f8fa;
+        color: #14171a;
+      }
+
+      .container {
+        width: 600px;
+        margin: 0 auto;
+      }
+
+      .post-card {
+        position: relative;
+        background-color: #fff;
+        border: 1px solid #e1e8ed;
+        margin-bottom: 10px;
+        padding: 20px;
+        border-radius: 5px;
+      }
+
+      .post-image {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+
+      .post-image img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+      }
+
+      .post-header {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .post-header a {
+        color: #1b95e0;
+        text-decoration: none;
+      }
+
+      .post-body {
+        margin-bottom: 10px;
+      }
+
+      .post-link a {
+        color: #1b95e0;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {{range .}}
+      <div class="post-card">
+        <!-- Post Image -->
+        <div class="post-image">
+          <a href="{{.Image.Link}}">
+            <img src="{{.Image.Url}}" alt="{{.Image.Title}}" />
+          </a>
+        </div>
+
+        <div class="post-content">
+          <div class="post-header">
+            <strong>{{.PubDate.Format "Jan 2, 2006"}}</strong> by
+            <a href="{{.Image.Link}}">{{.Image.Title}}</a>
+          </div>
+
+          <div class="post-body">{{.Content}}</div>
+
+          <div class="post-link">
+            <a href="{{.Link}}">Open Tweet</a>
+          </div>
+        </div>
+      </div>
+      {{end}}
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
