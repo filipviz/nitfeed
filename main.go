@@ -10,17 +10,20 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"strings"
 	"sync"
+	tt "text/template"
 	"time"
 )
 
 const nitterUrl string = "https://nitter.cz/"
 
 type Post struct {
-	PubDate time.Time
-	Image   Image
-	Link    string
-	Content template.HTML
+	PubDate       time.Time
+	Image         Image
+	Link          string
+	Content       template.HTML
+	StringContent string
 }
 
 type Posts struct {
@@ -81,7 +84,30 @@ func main() {
 		fmt.Printf("Could not write to output file: %v\n", err)
 		os.Exit(1)
 	}
+
+	outputText, err := os.Create("output.txt")
+	if err != nil {
+		fmt.Printf("Could not create output file: %v\n", err)
+		os.Exit(1)
+	}
+	defer outputText.Close()
+
+	const postTemplate = `{{range .}}{{.Image.Title}}: {{.StringContent | removeNewlines}}
+{{end}}`
+	t2, err := tt.New("postTemplate").Funcs(tt.FuncMap{"removeNewlines": removeNewlines}).Parse(postTemplate)
+	if err != nil {
+		fmt.Printf("Failed to create text template: %v\n", err)
+		os.Exit(1)
+	}
+
+	err = t2.Execute(outputText, p.posts)
+	if err != nil {
+		fmt.Printf("Could not write to output: %v\n", err)
+		os.Exit(1)
+	}
 }
+
+func removeNewlines(input string) string { return strings.ReplaceAll(input, "\n", "") }
 
 type Item struct {
 	XMLName     xml.Name `xml:"item"`
@@ -151,10 +177,11 @@ func (p *Posts) fetchPosts(feedUrl string, wg *sync.WaitGroup) {
 		}
 
 		xmlPosts = append(xmlPosts, Post{
-			PubDate: t,
-			Image:   r.Channel.Image,
-			Link:    xmlPost.Link,
-			Content: template.HTML(html.UnescapeString(xmlPost.Description)),
+			PubDate:       t,
+			Image:         r.Channel.Image,
+			Link:          xmlPost.Link,
+			Content:       template.HTML(html.UnescapeString(xmlPost.Description)),
+			StringContent: xmlPost.Title,
 		})
 	}
 
